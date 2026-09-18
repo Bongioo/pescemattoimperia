@@ -15,6 +15,8 @@ import * as Haptics from "expo-haptics";
 import { makeStyles, useTheme, fonts, spacing, radius } from "@/src/theme";
 import { RESTAURANT_INFO, getOpenStatus } from "@/src/data/menu";
 import { useTabBarHeight } from "@/src/utils/tabBar";
+import { usePhoneNumber } from "@/src/hooks/useSettings";
+import { useRouter } from "expo-router";
 
 const INFO_BANNER =
   "https://images.unsplash.com/photo-1686659732711-3fe1ca60a221?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzF8MHwxfHNlYXJjaHwxfHxJbXBlcmlhJTIwSXRhbHklMjBjb2FzdHxlbnwwfHx8fDE3ODkyNDMxNzB8MA&ixlib=rb-4.1.0&q=85";
@@ -28,13 +30,15 @@ export default function Info() {
   const status = getOpenStatus();
   const now = new Date();
   const todayIdx = (now.getDay() === 0 ? 6 : now.getDay() - 1);
+  const { phone, phoneDisplay } = usePhoneNumber();
+  const router = useRouter();
 
   const haptic = () =>
     Platform.OS !== "web" && Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
 
   const call = () => {
     haptic();
-    Linking.openURL(`tel:${RESTAURANT_INFO.phone}`).catch(() => {});
+    Linking.openURL(`tel:${phone}`).catch(() => {});
   };
 
   const openMaps = () => {
@@ -109,7 +113,7 @@ export default function Info() {
             <View style={{ flex: 1 }}>
               <Text style={styles.contactLabel}>Telefono</Text>
               <Text style={[styles.contactValue, styles.contactLink]}>
-                {RESTAURANT_INFO.phoneDisplay}
+                {phoneDisplay}
               </Text>
             </View>
             <Feather name="chevron-right" size={18} color={colors.muted} />
@@ -178,6 +182,34 @@ export default function Info() {
             aglio. Per gli allergeni consulta la sezione dedicata nel menu.
           </Text>
         </View>
+
+        {/* Legal footer */}
+        <View style={styles.legalCard} testID="info-legal-footer">
+          <Text style={styles.legalTitle}>Informazioni legali</Text>
+          <Text style={styles.legalCompany}>TRATTORIA DELLA SALUTE S.R.L.S.</Text>
+          <Text style={styles.legalLine}>
+            Sede legale: Piazza Matteotti n. 6 — 18015 Riva Ligure (IM)
+          </Text>
+          <Text style={styles.legalLine}>
+            P.IVA / C.F. 01716090087 — CCIAA di IM — REA 220844
+          </Text>
+          <Text style={styles.legalLine}>
+            Capitale sociale € 10.000,00 i.v. — Società unipersonale
+          </Text>
+        </View>
+
+        <Pressable
+          onPress={() => {
+            haptic();
+            router.push("/admin/login");
+          }}
+          style={styles.adminLink}
+          hitSlop={12}
+          testID="info-admin-link"
+        >
+          <Feather name="lock" size={11} color={colors.muted} />
+          <Text style={styles.adminLinkText}>Area riservata gestore</Text>
+        </Pressable>
 
         <Text style={styles.footer}>© Il Pescematto · Trattoria del Mare</Text>
       </ScrollView>
@@ -429,5 +461,52 @@ const useStyles = makeStyles((colors) => ({
     fontSize: 12,
     color: colors.muted,
     letterSpacing: 0.6,
+  },
+  legalCard: {
+    marginTop: spacing.xl,
+    marginHorizontal: spacing.xl,
+    padding: spacing.lg,
+    borderRadius: radius.md,
+    borderWidth: 0.5,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceSecondary,
+  },
+  legalTitle: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 10,
+    letterSpacing: 2,
+    textTransform: "uppercase",
+    color: colors.brandPrimary,
+    marginBottom: spacing.sm,
+  },
+  legalCompany: {
+    fontFamily: fonts.displayBold,
+    fontSize: 14,
+    color: colors.onSurface,
+    letterSpacing: 0.4,
+    marginBottom: 6,
+  },
+  legalLine: {
+    fontFamily: fonts.body,
+    fontSize: 11,
+    color: colors.onSurfaceSecondary,
+    lineHeight: 16,
+    marginTop: 2,
+  },
+  adminLink: {
+    marginTop: spacing.lg,
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 6,
+  },
+  adminLinkText: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 11,
+    letterSpacing: 1,
+    textTransform: "uppercase",
+    color: colors.muted,
   },
 }));

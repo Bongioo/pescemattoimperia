@@ -15,8 +15,9 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 
 import { makeStyles, useTheme, fonts, spacing, radius } from "@/src/theme";
-import { getOpenStatus, RESTAURANT_INFO } from "@/src/data/menu";
+import { getOpenStatus } from "@/src/data/menu";
 import { useTabBarHeight } from "@/src/utils/tabBar";
+import { usePhoneNumber } from "@/src/hooks/useSettings";
 
 const LOGO_URL =
   "https://customer-assets-cm19k8pv.emergentagent.net/job_il-pescematto/artifacts/q3b3k7iy_IMG_7974.jpeg";
@@ -32,6 +33,7 @@ export default function Home() {
   const router = useRouter();
 
   const status = getOpenStatus();
+  const { phone } = usePhoneNumber();
 
   const haptic = () => {
     if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
@@ -39,7 +41,7 @@ export default function Home() {
 
   const call = () => {
     haptic();
-    Linking.openURL(`tel:${RESTAURANT_INFO.phone}`).catch(() => {});
+    Linking.openURL(`tel:${phone}`).catch(() => {});
   };
 
   const openMenu = () => {
