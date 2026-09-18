@@ -19,10 +19,8 @@ import { getOpenStatus } from "@/src/data/menu";
 import { useTabBarHeight } from "@/src/utils/tabBar";
 import { usePhoneNumber } from "@/src/hooks/useSettings";
 
-const LOGO_URL =
-  "https://customer-assets-cm19k8pv.emergentagent.net/job_il-pescematto/artifacts/q3b3k7iy_IMG_7974.jpeg";
-const HERO_URL =
-  "https://images.unsplash.com/photo-1518156677180-95a2893f3e9f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzB8MHwxfHNlYXJjaHwxfHxkYXJrJTIwb2NlYW4lMjB3YXZlcyUyMGFic3RyYWN0JTIwbHV4dXJ5fGVufDB8fHx8MTc4OTI0MzE2MXww&ixlib=rb-4.1.0&q=85";
+const LOGO_SOURCE = require("@/assets/images/local/logo.jpg");
+const HERO_SOURCE = require("@/assets/images/local/hero-home.jpg");
 
 export default function Home() {
   const styles = useStyles();
@@ -51,7 +49,7 @@ export default function Home() {
 
   return (
     <View style={styles.container} testID="home-screen">
-      <Image source={{ uri: HERO_URL }} style={styles.hero} contentFit="cover" />
+      <Image source={HERO_SOURCE} style={styles.hero} contentFit="cover" />
       <LinearGradient
         colors={[
           "rgba(5,8,15,0.35)",
@@ -83,7 +81,7 @@ export default function Home() {
         {/* Logo */}
         <View style={styles.logoWrap}>
           <Image
-            source={{ uri: LOGO_URL }}
+            source={LOGO_SOURCE}
             style={styles.logo}
             contentFit="contain"
             testID="home-logo"

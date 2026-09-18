@@ -1,27 +1,26 @@
 # Il Pescematto — Trattoria del Mare (Imperia)
 
-Mobile app Expo/React Native per il ristorante "Il Pescematto" a Borgo Prino, Imperia. Design elegante marittimo (dark) ispirato al logo.
+Sito web / Web app (Expo + react-native-web) per il ristorante "Il Pescematto" a Borgo Prino, Imperia. Design elegante marittimo (dark) ispirato al logo. Il progetto è pubblicabile come sito web tramite il pulsante Publish di Emergent.
 
 ## Funzionalità
-- **Home**: logo, tagline, stato Aperto/Chiuso live, CTA "Vedi il Menu" e "Prenota" (tel:).
-- **Menu**: 9 categorie con chip orizzontali sticky, prezzi in oro, allergeni per piatto. Modal "Allergeni" con legenda completa (14 voci). Il menu è dinamico e caricato da storage (override) o dal default.
-- **Info**: contatti tappabili (telefono, "Apri in Maps"), tabella orari con evidenza del giorno corrente ("Mercoledì → Chiuso"), coperto € 2,00.
-- **Footer legale**: dati societari TRATTORIA DELLA SALUTE S.R.L.S.
-- **Area riservata gestore**: login con username/password. Permette di:
-  - Modificare il numero di telefono mostrato in Home e Info
-  - Modificare il menu completo: aggiungere/modificare/eliminare piatti, riordinarli con frecce su/giù, ripristinare il menu originale (`/admin/menu`)
-  - Ogni piatto ha nome, descrizione, prezzo (anche "s.q.") e allergeni (1-14, separati da virgola)
+- **Home**: logo bundlato, tagline, stato Aperto/Chiuso live, CTA "Vedi il Menu" e "Prenota".
+- **Menu**: 9 categorie con chip orizzontali sticky, prezzi in oro, allergeni per piatto. Modal "Allergeni" con legenda completa (14 voci). Menu dinamico, caricato da storage locale (override gestore) o dal default.
+- **Info**: contatti tappabili (telefono, "Apri in Maps"), tabella orari, coperto, informazioni legali societarie, link legali.
+- **Area riservata gestore** (`/admin/login` → `/admin/settings` → `/admin/menu`): modifica numero di telefono e menu completo (aggiunta/modifica/eliminazione/riordino piatti, reset).
+
+## Compliance & Legal
+- **Cookie notice**: pannello informativo alla prima visita (chiusura tramite "Ho capito" o link Cookie Policy). Non oscura la pagina.
+- **Cookie Policy** (`/cookie-policy`): elenca solo strumenti tecnici realmente usati (`settings.phone`, `settings.menu`, `cookie_notice.acknowledged`). Pulsante per cancellare le preferenze locali dal dispositivo. Elenco esplicito di strumenti NON usati (Analytics, Meta Pixel, ecc.).
+- **Privacy Policy** (`/privacy-policy`): impianto GDPR con dati del Titolare (TRATTORIA DELLA SALUTE S.R.L.S.) e placeholder `[DA COMPLETARE]` per email privacy, DPO e altre voci fuori portata del codice.
+- Footer Info ha 3 link: Cookie Policy · Privacy Policy · Gestisci cookie (riapre l'informativa).
+- Tutte le immagini sono nel bundle locale (`assets/images/local/`): il sito non fa richieste a domini terzi. Google Maps si apre solo su click esplicito dell'utente.
 
 ## Stack tecnico
-- Expo 57 + expo-router (tabs + stack), react-native-safe-area-context, react-native-reanimated, expo-image, expo-linear-gradient, expo-blur, expo-haptics, @react-native-vector-icons/feather.
-- Nessun backend: dati menu statici in `/app/frontend/src/data/menu.ts`.
+- Expo 57 + expo-router (tabs + stack), react-native-safe-area-context, expo-image, expo-linear-gradient, expo-blur, expo-haptics, @react-native-vector-icons/feather.
+- Storage locale via `@/src/utils/storage`. Nessun backend.
+- `app.json` ottimizzato per web (rimossi `ios.bundleIdentifier`, `android.package`, `android.adaptiveIcon`, `ios.supportsTablet`).
 
-## File chiave
-- `/app/frontend/app/_layout.tsx` — root con SafeArea + prewarming icone.
-- `/app/frontend/app/(tabs)/{index,menu,info}.tsx` — tab principali.
-- `/app/frontend/app/admin/{login,settings}.tsx` — area riservata.
-- `/app/frontend/src/hooks/useSettings.ts` — hook telefono + auth gestore.
-- `/app/frontend/src/theme.ts` — token colore (dark) + spacing + font.
-
-## Note
-- L'accesso gestore è client-only (device gate); credenziali in `EXPO_PUBLIC_ADMIN_USER` / `EXPO_PUBLIC_ADMIN_PASS`. In deploy pubblico i valori sono visibili nel bundle — sufficiente per un semplice pannello locale, non per protezione di dati sensibili.
+## Da completare a cura del Titolare
+- Email dedicata alle richieste privacy nella Privacy Policy.
+- Eventuale nomina DPO (di norma non richiesta per la ristorazione).
+- Periodi di conservazione di dati raccolti off-site (prenotazioni telefoniche).

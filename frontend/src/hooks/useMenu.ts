@@ -110,7 +110,9 @@ export async function moveItem(
 
 export async function resetMenu(): Promise<boolean> {
   const menu = cloneDefault();
-  return persist(menu);
+  await storage.removeItem(MENU_KEY);
+  notify(menu);
+  return true;
 }
 
 function cloneStructure(menu: MenuCategory[]): MenuCategory[] {

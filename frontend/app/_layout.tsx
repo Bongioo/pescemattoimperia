@@ -9,6 +9,7 @@ import * as SplashScreen from "expo-splash-screen";
 import "@react-native-vector-icons/feather";
 
 import { ErrorBoundary } from "@/src/components/error-boundary";
+import { CookieNotice } from "@/src/components/cookie-notice";
 import { queryClient } from "@/src/query-client";
 
 LogBox.ignoreAllLogs(true);
@@ -32,6 +33,7 @@ export default function RootLayout() {
                 animation: "fade",
               }}
             />
+            <CookieNotice />
           </QueryClientProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>

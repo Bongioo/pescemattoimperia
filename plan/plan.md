@@ -1,69 +1,142 @@
-# Piano — Pannello amministrativo Il Pescematto
+# Piano — Pubblicazione come sito web + gestione cookie/tracciamento
 
-## Obiettivo
-Rendere completamente gestibile dal titolare, senza toccare il codice, tutto ciò che oggi è "cablato" nell'app: menu (categorie e prodotti), orari, chiusure straordinarie e informazioni del ristorante. L'app pubblica esistente (Home, Menu, Info) resta com'è dal punto di vista visivo e di navigazione: cambia solo la sorgente dei contenuti, che passa dai dati hardcoded a un backend.
+## 1. Da progetto Expo a sito web pubblico
 
-## Come funziona per chi la usa
+Il progetto è già impostato su Expo con `react-native-web`. Può essere pubblicato come sito web senza riscriverlo: le stesse schermate (Home, Menu, Info, Area gestore) diventano pagine SPA servite dal browser.
 
-### Sito/app pubblico
-Nessuna differenza percepibile: le tre schede attuali continuano a mostrare gli stessi contenuti, ma leggendoli dal server. All'apertura viene mostrato un breve caricamento se la rete è lenta; se il server non risponde, l'app mostra l'ultima versione dei contenuti già vista in precedenza (fallback offline), così un cliente non trova mai una pagina vuota.
+Verranno rimosse dal manifest solo le configurazioni utili unicamente allo Store:
+- identificativo pacchetto iOS
+- identificativo pacchetto Android
+- icona adattiva Android
+- flag "supportsTablet" iOS
 
-### Area amministrativa
-Accessibile solo tramite l'indirizzo `/admin/login` (sull'anteprima web e, dopo il deploy, sul dominio pubblicato). Non è raggiungibile da alcun link dell'app pubblica ed è indicizzabile solo da chi conosce l'URL. Chiunque provi ad aprire `/admin` senza aver fatto login viene rimandato alla schermata di login.
+Non verrà tolto niente che serva al funzionamento web. Il pulsante di pubblicazione di Emergent viene usato in modalità "solo web".
 
-**Login** — un unico account "titolare" con email e password. Nessuna pagina di registrazione, nessun recupero password automatico via email in questa prima versione (verrà scelta la password iniziale — vedi "Decisioni aperte"). Dopo 5 tentativi sbagliati consecutivi dallo stesso indirizzo IP, ulteriori tentativi vengono bloccati per 15 minuti.
+Nessun cambio a design, contenuti o funzionalità.
 
-**Dashboard** — schermata iniziale con quattro tessere che portano alle sezioni gestibili, più un riepilogo (stato aperto/chiuso di oggi, prossima chiusura straordinaria in programma, numero di prodotti a menu).
+---
 
-**Sezione Menu** — elenco delle categorie in ordine di visualizzazione, ciascuna espandibile per vedere i prodotti al suo interno. Per ogni categoria: rinomina, riordina (frecce su/giù o drag), elimina (con conferma). Per ogni prodotto: modifica nome, descrizione, prezzo, allergeni; sposta in un'altra categoria; riordina; imposta un badge tra "Novità", "Consigliato", "Non disponibile" (uno solo alla volta) oppure nessuno; elimina (con conferma). Aggiunta rapida di una nuova categoria o di un nuovo prodotto. Le variazioni sono salvate una a una con feedback "Modifiche salvate correttamente" e sono visibili nell'app pubblica subito dopo il salvataggio.
+## 2. Audit reale del progetto (ciò che il sito usa oggi)
 
-Nota — I prodotti marcati "Non disponibile" restano visibili nel menu pubblico ma appaiono in grigio con l'etichetta "Non disponibile" (scelta comune per le trattorie: il cliente vede che il piatto esiste ma non è ordinabile oggi).
+Analisi del codice così com'è, senza inventare nulla:
 
-**Sezione Orari** — una riga per ogni giorno della settimana. Per ciascun giorno: interruttore "Aperto/Chiuso" e, se aperto, una o più fasce orarie (es. 12:00–14:30 e 19:00–22:30). Pulsante "Aggiungi fascia" per gestire il pranzo e la cena in modo indipendente, con possibilità di aggiungerne altre in casi speciali. Le modifiche aggiornano immediatamente la scheda Info e la fascia "Aperto ora / Chiuso" della Home.
+### Cookie propri del sito
+Nessuno. Il sito non imposta cookie sul proprio dominio.
 
-**Sezione Chiusure straordinarie** — elenco cronologico delle date di chiusura (es. 25 dicembre, Ferragosto). Per ciascuna: data, motivazione opzionale (mostrata al cliente solo se compilata), modifica ed eliminazione. Le chiusure straordinarie hanno la precedenza sugli orari settimanali: nel giorno di chiusura l'app pubblica mostra "Chiuso" e, se presente, la motivazione.
+### Local storage (prima parte, tecnico)
+- `settings.phone` — numero di telefono personalizzato dal gestore
+- `settings.menu` — versione personalizzata del menu dal gestore
 
-**Sezione Informazioni** — modulo unico con: nome del locale, sottotitolo/tagline, descrizione (testo libero visualizzato sulla Home), indirizzo, telefono (usato dai pulsanti "Chiama"), email, link Google Maps, link social (Facebook, Instagram — opzionali; se compilati, appaiono come icone nella scheda Info).
+Entrambi servono al funzionamento della funzione di modifica del gestore. Non escono dal browser, non vengono inviati a nessuno.
 
-**Account** — cambio password (richiede la password attuale). Nessun'altra impostazione in questa prima versione.
+### Area gestore
+Autenticazione tenuta solo in memoria (persa alla chiusura della scheda). Nessun cookie, nessun token persistente.
 
-**Logout** — pulsante sempre visibile nella barra laterale (o nel menu a tendina su mobile). Termina la sessione e riporta al login.
+### Risorse caricate da domini esterni
+- 1 logo servito da `customer-assets-cm19k8pv.emergentagent.net` (dominio della piattaforma di hosting)
+- 2 immagini di sfondo servite da `images.unsplash.com` (hero della Home e banner della Info)
 
-### Layout dell'admin
-Sidebar verticale a sinistra su desktop/tablet con le voci: Dashboard, Menu, Orari, Chiusure, Informazioni, Account, Logout. Su smartphone la sidebar diventa un menu a tendina apribile dall'icona ☰ in alto a sinistra. Interfaccia in italiano, testi chiari, pulsanti grandi, tipografia leggibile. Tutte le operazioni (creazione, modifica, riordino, cancellazione) sono possibili anche da telefono.
+Queste sono richieste di sole immagini, non impostano cookie di tracciamento sul dominio del sito, ma sono comunque richieste verso un dominio terzo.
 
-## Cosa cambia sull'app pubblica
-- Menu, orari, chiusure e informazioni non sono più letti da un file di codice ma da una chiamata al server. I contenuti attuali (menu completo del Pescematto, orari 12:00–14:30 / 19:00–22:30 tranne mercoledì, indirizzo Borgo Prino Imperia, telefono 0183 754557) vengono usati come "contenuto iniziale" e resteranno identici a quelli visibili oggi finché il titolare non li modificherà.
-- L'indicatore "Aperto ora / Chiuso" tiene conto anche delle chiusure straordinarie.
-- Se un prodotto è "Non disponibile", viene mostrato in grigio con etichetta; se è "Novità" o "Consigliato", ha un piccolo badge dorato di fianco al nome.
+### Servizi terzi che si attivano solo su azione esplicita dell'utente
+- "Apri in Maps" apre Google Maps in una nuova scheda (link esterno standard)
+- "Chiama" / "Prenota" apre il compositore telefonico (`tel:`)
 
-## Sicurezza — come è protetta l'area admin
-- Password del titolare salvata solo come hash sicuro (bcrypt) nel database. Nessuna credenziale scritta nel codice dell'app.
-- La verifica delle credenziali avviene esclusivamente sul server. Il codice dell'app scaricato dai clienti non contiene né user né password né chiavi segrete.
-- Ogni chiamata alle API di amministrazione (creare, modificare, eliminare) richiede un token di sessione valido; senza token, il server risponde 401 Unauthorized. Il fatto che l'interfaccia admin sia nascosta al pubblico non è la sola barriera: anche chi provasse a chiamare le API direttamente riceverebbe un rifiuto.
-- Comunicazione sempre in HTTPS (già garantita dall'ambiente di anteprima e di produzione Emergent).
-- Protezione contro tentativi ripetuti di login: 5 errori dallo stesso IP → blocco temporaneo di 15 minuti.
-- Il token di sessione ha durata 7 giorni (finestra abbastanza comoda per il titolare, senza essere eterna). Il logout invalida il token immediatamente.
-- Sanificazione dei dati in ingresso: nome/descrizione dei prodotti passano da un controllo di lunghezza massima e di caratteri consentiti; il prezzo viene interpretato come numero e formattato server-side.
+Nessun contenuto di terze parti è incorporato in pagina.
 
-## Cosa NON è incluso in questa versione
-Per tenere il progetto snello e coerente con la richiesta, restano fuori:
-- Registrazione pubblica utenti (esplicitamente esclusa dalla richiesta).
-- Recupero password via email (non richiesto; la password si cambia dal pannello Account una volta loggati).
-- Autenticazione a due fattori.
-- Prenotazioni online (l'utente conferma "solo numero di telefono da chiamare").
-- Ordini da asporto o pagamenti.
-- Multi-utente (più account amministratori).
-- Caricamento immagini per i piatti (l'utente ha scelto "solo menu testuale", nessuna galleria).
-- Traduzioni multilingua dell'app pubblica.
+### Cosa NON è presente nel progetto
+Nessun Google Analytics, nessun Google Tag Manager, nessun Meta/Facebook Pixel, nessun TikTok Pixel, nessun embed YouTube o Instagram, nessun font caricato da CDN, nessun sistema di prenotazione, nessun chatbot, nessun widget marketing, nessuna libreria di fingerprinting.
 
-Questi punti sono aggiungibili come iterazioni future.
+### Conclusione dell'audit
+Il sito nella sua forma attuale usa **soltanto strumenti tecnici**. Non c'è nulla per cui, oggi, sia richiesto un consenso preventivo dell'utente.
 
-## Decisioni aperte — cortesemente da confermare
-1. **Credenziali iniziali del titolare.** Servono l'email e la password di partenza per il primo login. Se preferisci, posso generare io una password iniziale robusta e mostrarla una sola volta; il titolare la cambierà al primo accesso dalla sezione "Account". In alternativa scegli tu email + password.
-2. **URL della pagina di login.** Confermi `/admin/login` (e area protetta su `/admin`) oppure preferisci un percorso meno indovinabile, ad esempio `/gestione/…`? Un URL meno prevedibile aggiunge un piccolo scoraggiamento ma nulla di più (la protezione vera è il login).
-3. **Badge "Novità / Consigliato / Non disponibile" — comportamento sul pubblico.** Confermi che "Non disponibile" debba restare visibile in grigio con etichetta (mostra al cliente che il piatto esiste ma oggi non c'è)? In alternativa può essere nascosto del tutto dalla lista.
-4. **Chiusure straordinarie ricorrenti.** Ti serve poter marcare una data come "chiusura ricorrente ogni anno" (es. 25 dicembre sempre chiuso), oppure ogni anno si inseriscono manualmente le nuove date? La prima opzione è più comoda ma aggiunge una piccola complessità alla schermata.
-5. **Motivazione della chiusura visibile al cliente.** La motivazione va mostrata sull'app pubblica accanto al giorno chiuso (es. "Chiuso — Ferie estive") o resta solo un promemoria interno per il titolare?
+---
 
-Se non risponderai a uno o più di questi punti, procederò con queste scelte di default: (1) genero una password iniziale robusta e la mostrerò nel messaggio finale; (2) URL `/admin/login`; (3) "Non disponibile" resta visibile in grigio; (4) niente ricorrenze automatiche, le chiusure si inseriscono anno per anno; (5) la motivazione è visibile al cliente solo se compilata.
+## 3. Scelta sulle immagini remote
+
+Le due hero images (Unsplash) e il logo (CDN Emergent) sono immagini decorative caricate da domini terzi. Non fanno tracking, ma sono comunque richieste esterne che l'utente attento può notare negli strumenti di sviluppo del browser.
+
+Due possibili strade:
+
+**A. Portarle nel bundle del sito** (raccomandata): il sito non fa più alcuna richiesta di dominio terzo. La Cookie Policy diventa più semplice e onesta perché non deve neanche menzionarle. Costo: qualche centinaio di KB in più nel pacchetto scaricato al primo accesso.
+
+**B. Lasciarle remote**: nessun cambiamento tecnico, ma la Cookie Policy dovrà elencare `images.unsplash.com` (e il dominio Emergent) come fornitori di risorse grafiche di terza parte.
+
+Assunzione senza risposta contraria: **Opzione A**.
+
+---
+
+## 4. Cosa verrà mostrato all'utente
+
+Poiché non ci sono strumenti che richiedano consenso, non verrà costruito un finto pannello "Accetta / Rifiuta / Personalizza" — sarebbe fittizio e in contrasto con le richieste stesse dell'utente. Verrà invece implementato:
+
+### a. Un'informativa breve alla prima visita
+Piccolo pannello in basso, coerente con lo stile del sito (stessi colori scuri marittimi, stesso font display, stessi bordi), non oscura la pagina.
+
+Testo indicativo:
+> "Questo sito usa soltanto strumenti tecnici salvati sul tuo browser (per esempio per ricordare le modifiche fatte dal gestore al menu). Non usiamo analytics, cookie di profilazione o pixel di marketing. Puoi leggere la Cookie Policy per il dettaglio."
+
+Un solo pulsante di chiusura ("Ho capito") e un link "Leggi la Cookie Policy". Nessuna casella preselezionata, nessun consenso mascherato: la chiusura è solo un acknowledgment dell'informativa, non un consenso a tracciamenti (che non esistono).
+
+Lo scroll e la semplice navigazione non chiudono il banner. La chiusura richiede un click esplicito.
+
+### b. Link "Gestisci cookie" sempre disponibile
+Aggiunto nel footer già presente (pagina Info). Riapre l'informativa e permette anche di cancellare le preferenze tecniche locali (pulsante "Cancella preferenze salvate su questo dispositivo", che svuota `settings.phone` e `settings.menu`).
+
+### c. Se in futuro il titolare vorrà attivare analytics o strumenti di marketing
+La stessa infrastruttura verrà estesa al modello a tre pulsanti (Accetta / Rifiuta / Personalizza) con blocco preventivo degli script. Non lo facciamo ora perché oggi non c'è nulla da bloccare.
+
+---
+
+## 5. Pagina Cookie Policy — `/cookie-policy`
+
+Contenuto costruito solo su ciò che l'audit ha trovato. Sezioni previste:
+
+- **Strumenti tecnici locali**: tabella con `settings.phone` e `settings.menu`. Per ciascuno: fornitore (prima parte, il sito stesso), tipologia (localStorage), finalità, durata (persistente finché l'utente non li cancella dal browser), come cancellarli.
+- **Terze parti — risorse grafiche**: sezione presente solo se resta l'Opzione B del punto 3.
+- **Servizi aperti dall'utente su click esplicito**: Google Maps (link esterno) e compositore telefonico. Nota che, una volta aperto Google Maps, si applica la privacy policy di Google.
+- **Area riservata gestore**: sessione tenuta in memoria durante la visita, nessun cookie né storage persistente.
+- **Cosa NON usiamo**: elenco esplicito di Google Analytics, Google Tag Manager, Meta Pixel, TikTok Pixel, YouTube embed, Instagram, Facebook SDK, chat, font esterni. Serve alla trasparenza.
+- Data di ultimo aggiornamento e collegamento alla Privacy Policy.
+
+Nessun campo verrà inventato. Se un dato non è deducibile dal progetto, viene segnalato come "da completare a cura del titolare", non riempito con contenuto fittizio.
+
+---
+
+## 6. Pagina Privacy Policy — `/privacy-policy`
+
+Sarà creata una struttura predisposta. I dati del titolare già in nostro possesso vengono usati così come sono:
+- TRATTORIA DELLA SALUTE S.R.L.S.
+- Piazza Matteotti n. 6, 18015 Riva Ligure (IM)
+- P.IVA / C.F. 01716090087 — REA 220844
+- Telefono 0183 754557
+
+Verranno inseriti placeholder chiaramente marcati (`[DA COMPLETARE — …]`) per le informazioni che il sito da solo non può ricavare, in particolare:
+- indirizzo email dedicato alle richieste privacy
+- eventuale DPO
+- eventuali trattamenti offline (fatturazione, prenotazioni telefoniche) che il titolare vorrà descrivere
+
+Non verranno inventati DPO, email o finalità di trattamento inesistenti.
+
+---
+
+## 7. Cosa non verrà cambiato
+
+Nessun cambiamento a: palette, font, layout, contenuti del menu, orari, info di contatto, flusso di login gestore, modifica telefono, modifica menu. Il pulsante "Publish" di Emergent continua a funzionare come oggi.
+
+---
+
+## 8. Punti che richiedono una scelta del titolare
+
+Elencati esplicitamente perché il piano non può decidere per lui:
+
+1. Email di contatto per richieste privacy (necessaria in Privacy Policy).
+2. Eventuale nomina di un DPO (di solito non richiesta per questo tipo di attività, ma è una scelta del titolare).
+3. Opzione A vs B sulle immagini remote (punto 3).
+4. Se in futuro verrà aggiunto un form di prenotazione online, un widget di recensioni, un pixel pubblicitario o Google Analytics: cambierà l'audit e verrà attivato un vero banner con blocco preventivo.
+
+---
+
+## 9. Rischio residuo dichiarato
+
+L'implementazione tecnica sarà coerente con quello che il sito fa oggi. Non verrà dichiarato che il sito è "conforme al 100%" a nessuna normativa: la conformità legale piena richiede una verifica di un professionista del diritto, che non viene fatta qui. L'obiettivo di questo lavoro è tecnicamente corretto, coerente con la normativa italiana/europea sui cookie applicata a un sito che usa solo strumenti tecnici, e predisposto a evolvere se in futuro verranno aggiunti strumenti che richiedono consenso.

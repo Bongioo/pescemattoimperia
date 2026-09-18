@@ -16,10 +16,10 @@ import { makeStyles, useTheme, fonts, spacing, radius } from "@/src/theme";
 import { RESTAURANT_INFO, getOpenStatus } from "@/src/data/menu";
 import { useTabBarHeight } from "@/src/utils/tabBar";
 import { usePhoneNumber } from "@/src/hooks/useSettings";
+import { triggerReopenNotice } from "@/src/hooks/useCookieNotice";
 import { useRouter } from "expo-router";
 
-const INFO_BANNER =
-  "https://images.unsplash.com/photo-1686659732711-3fe1ca60a221?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzF8MHwxfHNlYXJjaHwxfHxJbXBlcmlhJTIwSXRhbHklMjBjb2FzdHxlbnwwfHx8fDE3ODkyNDMxNzB8MA&ixlib=rb-4.1.0&q=85";
+const INFO_BANNER = require("@/assets/images/local/hero-info.jpg");
 
 export default function Info() {
   const styles = useStyles();
@@ -62,7 +62,7 @@ export default function Info() {
       >
         {/* Banner */}
         <View style={styles.bannerWrap}>
-          <Image source={{ uri: INFO_BANNER }} style={styles.banner} contentFit="cover" />
+          <Image source={INFO_BANNER} style={styles.banner} contentFit="cover" />
           <LinearGradient
             colors={["rgba(5,8,15,0.35)", "rgba(5,8,15,0.5)", "#05080F"]}
             style={styles.bannerScrim}
@@ -210,6 +210,42 @@ export default function Info() {
           <Feather name="lock" size={11} color={colors.muted} />
           <Text style={styles.adminLinkText}>Area riservata gestore</Text>
         </Pressable>
+
+        {/* Legal links row */}
+        <View style={styles.legalLinks}>
+          <Pressable
+            onPress={() => {
+              haptic();
+              router.push("/cookie-policy");
+            }}
+            hitSlop={8}
+            testID="info-cookie-policy-link"
+          >
+            <Text style={styles.legalLink}>Cookie Policy</Text>
+          </Pressable>
+          <Text style={styles.legalLinkSep}>·</Text>
+          <Pressable
+            onPress={() => {
+              haptic();
+              router.push("/privacy-policy");
+            }}
+            hitSlop={8}
+            testID="info-privacy-policy-link"
+          >
+            <Text style={styles.legalLink}>Privacy Policy</Text>
+          </Pressable>
+          <Text style={styles.legalLinkSep}>·</Text>
+          <Pressable
+            onPress={() => {
+              haptic();
+              triggerReopenNotice();
+            }}
+            hitSlop={8}
+            testID="info-manage-cookies-link"
+          >
+            <Text style={styles.legalLink}>Gestisci cookie</Text>
+          </Pressable>
+        </View>
 
         <Text style={styles.footer}>© Il Pescematto · Trattoria del Mare</Text>
       </ScrollView>
@@ -508,5 +544,25 @@ const useStyles = makeStyles((colors) => ({
     letterSpacing: 1,
     textTransform: "uppercase",
     color: colors.muted,
+  },
+  legalLinks: {
+    marginTop: spacing.md,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
+    flexWrap: "wrap",
+    paddingHorizontal: spacing.xl,
+  },
+  legalLink: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 11,
+    letterSpacing: 0.6,
+    color: colors.onSurfaceSecondary,
+    textDecorationLine: "underline",
+  },
+  legalLinkSep: {
+    color: colors.muted,
+    fontSize: 11,
   },
 }));

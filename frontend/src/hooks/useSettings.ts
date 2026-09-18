@@ -27,6 +27,12 @@ export async function updatePhoneNumber(next: string): Promise<boolean> {
   return ok;
 }
 
+export async function resetPhoneToDefault(): Promise<boolean> {
+  const ok = await storage.removeItem(PHONE_KEY);
+  notify(RESTAURANT_INFO.phone);
+  return ok;
+}
+
 export function formatPhone(raw: string): string {
   const digits = raw.replace(/\D/g, "");
   if (digits.length >= 10) {
