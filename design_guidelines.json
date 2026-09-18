@@ -1,0 +1,149 @@
+{
+  "app_name": "Il Pescematto",
+  "personality": "6 Glass / Luxe DARK",
+  "personality_one_liner": "Elegante marittimo: a premium, dark, and cinematic experience evoking the depths of the sea with dusty blue and warm sand accents.",
+  "color": {
+    "surface": "#05080F",
+    "onSurface": "#F7F5F0",
+    "surfaceSecondary": "#0E1624",
+    "onSurfaceSecondary": "#E8E4D9",
+    "surfaceTertiary": "#162235",
+    "onSurfaceTertiary": "#D0CBBF",
+    "surfaceInverse": "#F7F5F0",
+    "onSurfaceInverse": "#05080F",
+    "brand": "#6082B6",
+    "onBrand": "#05080F",
+    "brandPrimary": "#C4A464",
+    "onBrandPrimary": "#05080F",
+    "brandSecondary": "#6082B6",
+    "onBrandSecondary": "#F7F5F0",
+    "brandTertiary": "#26364A",
+    "onBrandTertiary": "#E8E4D9",
+    "success": "#3A5A40",
+    "onSuccess": "#FFFFFF",
+    "warning": "#C4A464",
+    "onWarning": "#05080F",
+    "error": "#7A2E2E",
+    "onError": "#FFFFFF",
+    "info": "#6082B6",
+    "onInfo": "#F7F5F0",
+    "border": "#26364A",
+    "borderStrong": "#3A506B",
+    "divider": "#1A2639",
+    "muted": "#8E9CAE"
+  },
+  "typography": {
+    "displayFontFamily": "Cormorant Garamond",
+    "textFontFamily": "DM Sans",
+    "scale": {
+      "sm": 12,
+      "base": 14,
+      "lg": 16,
+      "xl": 20,
+      "2xl": 24
+    }
+  },
+  "spacing": {
+    "rule": "Generous vertical breathing room for luxury feel. Intentional padding. Use flex grids effectively, no accidental empty spaces.",
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "2xl": 32,
+    "3xl": 48
+  },
+  "radius_tokens": {
+    "sm": 6,
+    "md": 12,
+    "lg": 20,
+    "pill": 999
+  },
+  "shadow_tier": 0,
+  "navigation": "bottom_tabs",
+  "icon_set": "Feather",
+  "glassmorphism": {
+    "enabled": true,
+    "do's": [
+      "Bottom tab bar",
+      "Sticky category chip row in Menu",
+      "Floating Action Buttons",
+      "Modal scrims and headers"
+    ],
+    "dont's": [
+      "Every list row",
+      "Dense body content",
+      "Form fields"
+    ]
+  },
+  "platform_libraries": {
+    "glass": {
+      "ios": "expo-glass-effect",
+      "android": "expo-blur",
+      "low_end_android_fallback": "solid surfaceSecondary"
+    },
+    "image": "expo-image",
+    "blur": "expo-blur",
+    "bottom_sheet": "@gorhom/bottom-sheet",
+    "animation": "react-native-reanimated",
+    "gesture": "react-native-gesture-handler"
+  },
+  "screens": [
+    {
+      "name": "Home",
+      "purpose": "A cinematic landing screen focusing on the restaurant's elegant maritime brand, current status, and primary actions.",
+      "states": {
+        "loading": "Centered brand-tinted spinner",
+        "empty": "N/A",
+        "error": "Error loading status with a retry button in brandPrimary"
+      },
+      "layout": "Full-bleed background image (`images.home_hero`) with a strong top-to-bottom gradient scrim (transparent to >80% surface at the bottom). Centered restaurant logo (using `images.logo`), elegant display typography for tagline 'Trattoria del Mare'. Below, an elegant status indicator ('Aperto' or 'Chiuso' with hours). Bottom 1/3 contains primary CTAs: 'Chiama' (gold/sand) and 'Menu' (dusty blue/glass). Elegant, sparse layout where the dark ocean visual carries the mood."
+    },
+    {
+      "name": "Menu",
+      "purpose": "A refined, text-only digital menu categorized clearly with a sticky header.",
+      "states": {
+        "loading": "Skeleton loaders for menu categories and items.",
+        "empty": "No menu items available right now.",
+        "error": "Failed to load menu. 'Riprova' button."
+      },
+      "layout": "Top: Sticky `ScrollView` (horizontal) for categories (Aperitivi, Bevande, Antipasti, Primi, Frittura, Secondi di pesce, La Nostra Griglia, Le Carni, Pizze) wrapped in a frosted glass container. The active chip uses `brandPrimary` (gold/sand) with `onBrandPrimary` text; inactive chips are subtle outlines or `surfaceTertiary`. Below: Sectioned `SectionList` or `FlatList` with large Serif headers for categories. Menu items are text-only: Left side has Dish Name (Serif, `lg` or `xl`, white) and description (if any, Sans, `muted`, `sm`), plus a subtle small pill or number for allergens. Right side has Price (`brandPrimary` gold/sand color, Serif). Use dividers (`1A2639`) between items. An 'Allergen Legend' FAB or sticky footer at the bottom."
+    },
+    {
+      "name": "Info",
+      "purpose": "Contact details, map, hours, and allergen legend in an elegant structured layout.",
+      "states": {
+        "loading": "Spinner.",
+        "empty": "N/A",
+        "error": "Failed to load info."
+      },
+      "layout": "Top banner image of Imperia coastal scene (`images.info_banner`) with gradient scrim. Below, sections styled as subtle glass or `surfaceSecondary` cards: 1. Contact (Address: Borgo Prino, Imperia, Phone: 0183 754557). Include 'Apri in Maps' button and 'Chiama' button. 2. Hours Table (Every day except Wed, 12:00-14:30 and 19:00-22:30). 3. Allergen Legend (List of numbers corresponding to allergens). Use generous padding, serif section titles, and clean sans-serif data points."
+    }
+  ],
+  "images": {
+    "logo": {
+      "url": "https://customer-assets-cm19k8pv.emergentagent.net/job_il-pescematto/artifacts/q3b3k7iy_IMG_7974.jpeg",
+      "alt": "Il Pescematto Logo"
+    },
+    "home_hero": {
+      "url": "https://images.unsplash.com/photo-1518156677180-95a2893f3e9f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzB8MHwxfHNlYXJjaHwxfHxkYXJrJTIwb2NlYW4lMjB3YXZlcyUyMGFic3RyYWN0JTIwbHV4dXJ5fGVufDB8fHx8MTc4OTI0MzE2MXww&ixlib=rb-4.1.0&q=85",
+      "alt": "Dark ocean wave abstract luxury"
+    },
+    "info_banner": {
+      "url": "https://images.unsplash.com/photo-1686659732711-3fe1ca60a221?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzF8MHwxfHNlYXJjaHwxfHxJbXBlcmlhJTIwSXRhbHklMjBjb2FzdHxlbnwwfHx8fDE3ODkyNDMxNzB8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Imperia Italy coast with boats"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Strictly follow the '6 Glass / Luxe DARK' personality layout: Cinematic, minimal, spacious, and reliant on depth and texture over pure flatness.",
+    "Do NOT use any blues besides the dusty blue specified (`brand`, `brandSecondary`, `brandTertiary`, `borderStrong`). Avoid default navy, indigo, or purple. The theme relies on very dark blue-grey for surfaces.",
+    "Implement the gradient scrim pattern perfectly on `Home` and `Info` screens: `transparent` -> `surface` over the image to ensure text readability.",
+    "Use `Cormorant Garamond` for all headings, menu item names, and large display text. Use `DM Sans` ONLY for prices, buttons, labels, and descriptions.",
+    "Ensure the menu is TEXT-ONLY. Do not add placeholder images for menu items. Use the layout: Dish name left, price right, separated by subtle space or dotted leader if necessary. Price color must be the `brandPrimary` gold/sand.",
+    "The horizontal category chips in the Menu screen must be sticky at the top, wrapped in a frosted glass container (`expo-blur`). Active chip is gold/sand, inactive is subtle.",
+    "Provide Haptics: add subtle vibration on tab presses, category chip selections, and CTA buttons.",
+    "Address action 'Apri in Maps' must open maps with Imperia, Borgo Prino coordinates. Call action must dial '0183 754557'.",
+    "Since the logo already has a black/dark background, render it with `contentFit=\"contain\"` on the Home screen over the dark wave background. Use the scrim to blend its dark background into the app's `surface` color.",
+    "No emojis allowed anywhere in the UI. Use `Feather` icons."
+  ]
+}
