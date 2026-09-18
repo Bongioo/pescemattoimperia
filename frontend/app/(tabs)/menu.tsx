@@ -14,8 +14,9 @@ import Feather from "@react-native-vector-icons/feather";
 import * as Haptics from "expo-haptics";
 
 import { makeStyles, useTheme, fonts, spacing, radius } from "@/src/theme";
-import { MENU, ALLERGENS, RESTAURANT_INFO, MenuItem } from "@/src/data/menu";
+import { ALLERGENS, RESTAURANT_INFO, MenuItem } from "@/src/data/menu";
 import { useTabBarHeight } from "@/src/utils/tabBar";
+import { useMenu } from "@/src/hooks/useMenu";
 type Section = {
   id: string;
   title: string;
@@ -30,7 +31,9 @@ export default function MenuScreen() {
   const tabBarHeight = useTabBarHeight();
   const { width } = useWindowDimensions();
 
-  const [activeCat, setActiveCat] = useState<string>(MENU[0].id);
+  const { menu } = useMenu();
+
+  const [activeCat, setActiveCat] = useState<string>(menu[0]?.id ?? "");
   const [allergensOpen, setAllergensOpen] = useState(false);
   const listRef = useRef<SectionList<MenuItem, Section>>(null);
   const chipsRef = useRef<ScrollView>(null);
@@ -51,13 +54,15 @@ export default function MenuScreen() {
 
   const sections: Section[] = useMemo(
     () =>
-      MENU.map((c) => ({
-        id: c.id,
-        title: c.title,
-        subtitle: c.subtitle,
-        data: c.items,
-      })),
-    [],
+      menu
+        .filter((c) => c.items.length > 0)
+        .map((c) => ({
+          id: c.id,
+          title: c.title,
+          subtitle: c.subtitle,
+          data: c.items,
+        })),
+    [menu],
   );
 
   const haptic = () =>
@@ -134,7 +139,7 @@ export default function MenuScreen() {
           contentContainerStyle={styles.chipsContent}
           testID="menu-category-chips"
         >
-          {MENU.map((c, idx) => {
+          {menu.filter((c) => c.items.length > 0).map((c, idx) => {
             const active = c.id === activeCat;
             return (
               <Pressable

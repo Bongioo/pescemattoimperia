@@ -15,6 +15,7 @@ import { useRouter, Stack, Redirect } from "expo-router";
 
 import { makeStyles, useTheme, fonts, spacing, radius } from "@/src/theme";
 import { useAdminAuth, usePhoneNumber, updatePhoneNumber, formatPhone } from "@/src/hooks/useSettings";
+import { useMenu } from "@/src/hooks/useMenu";
 
 export default function AdminSettings() {
   const styles = useStyles();
@@ -23,6 +24,7 @@ export default function AdminSettings() {
   const router = useRouter();
   const { isAuthenticated, logout } = useAdminAuth();
   const { phone } = usePhoneNumber();
+  const { menu } = useMenu();
 
   const [value, setValue] = useState<string>(phone);
   const [saved, setSaved] = useState<boolean>(false);
@@ -36,12 +38,14 @@ export default function AdminSettings() {
     return <Redirect href="/admin/login" />;
   }
 
-  const haptic = (style: "success" | "error" = "success") => {
+  const haptic = (style: "success" | "error" | "light" = "light") => {
     if (Platform.OS === "web") return;
     if (style === "success") {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
-    } else {
+    } else if (style === "error") {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
+    } else {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     }
   };
 
@@ -74,6 +78,8 @@ export default function AdminSettings() {
     logout();
     router.replace("/(tabs)/info");
   };
+
+  const totalItems = menu.reduce((n, c) => n + c.items.length, 0);
 
   return (
     <>
@@ -117,9 +123,30 @@ export default function AdminSettings() {
               <Text style={styles.title}>Impostazioni</Text>
               <View style={styles.divider} />
               <Text style={styles.subtitle}>
-                Modifica il numero di telefono mostrato nell'app.
+                Aggiorna il numero di telefono e il menu del ristorante.
               </Text>
             </View>
+
+            {/* Menu editor entry */}
+            <Pressable
+              onPress={() => {
+                haptic("light");
+                router.push("/admin/menu");
+              }}
+              style={({ pressed }) => [styles.linkCard, pressed && { opacity: 0.9 }]}
+              testID="admin-menu-editor-link"
+            >
+              <View style={styles.linkIcon}>
+                <Feather name="book-open" size={20} color={colors.brandPrimary} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.linkTitle}>Modifica menu</Text>
+                <Text style={styles.linkHint}>
+                  {menu.length} categorie · {totalItems} piatti
+                </Text>
+              </View>
+              <Feather name="chevron-right" size={20} color={colors.muted} />
+            </Pressable>
 
             {/* Phone editor card */}
             <View style={styles.card}>
@@ -243,8 +270,39 @@ const useStyles = makeStyles((colors) => ({
     letterSpacing: 0.3,
     paddingHorizontal: spacing.xl,
   },
+  linkCard: {
+    marginTop: spacing.xl,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+    padding: spacing.lg,
+    borderRadius: radius.lg,
+    borderWidth: 0.5,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceSecondary,
+  },
+  linkIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.surfaceTertiary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  linkTitle: {
+    fontFamily: fonts.displayBold,
+    fontSize: 18,
+    color: colors.onSurface,
+  },
+  linkHint: {
+    fontFamily: fonts.body,
+    fontSize: 12,
+    color: colors.muted,
+    marginTop: 2,
+    letterSpacing: 0.2,
+  },
   card: {
-    marginTop: spacing.xxl,
+    marginTop: spacing.xl,
     backgroundColor: colors.surfaceSecondary,
     borderRadius: radius.lg,
     borderWidth: 0.5,
