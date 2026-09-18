@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { storage } from "@/src/utils/storage";
-import { resetPhoneToDefault } from "@/src/hooks/useSettings";
-import { resetMenu } from "@/src/hooks/useMenu";
+import { forceLogout } from "@/src/hooks/useSettings";
 
 const NOTICE_KEY = "cookie_notice.acknowledged";
 
@@ -65,8 +64,11 @@ export function useCookieNotice(): {
 }
 
 export async function clearLocalPreferences(): Promise<void> {
-  await resetPhoneToDefault();
-  await resetMenu();
+  // Only clear per-device data: admin JWT and the informativa acknowledgment.
+  // Menu and phone are now server-side and shared across all users.
+  await forceLogout();
+  await storage.removeItem(NOTICE_KEY);
+  notify(false);
 }
 
 // Global registry so any screen can trigger reopening the notice

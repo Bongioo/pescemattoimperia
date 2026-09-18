@@ -1,46 +1,57 @@
 import { useEffect, useState, useCallback } from "react";
-import { storage } from "@/src/utils/storage";
 import { RESTAURANT_INFO } from "@/src/data/menu";
+import {
+  fetchPhone,
+  savePhone as savePhoneApi,
+  loginApi,
+  logoutApi,
+  getToken,
+  clearToken,
+  ApiError,
+} from "@/src/api";
 
-const PHONE_KEY = "settings.phone";
-
-type Listener = (phone: string) => void;
-const listeners = new Set<Listener>();
+// ---------- Phone number (server-side) ----------
+type PhoneListener = (phone: string) => void;
+const phoneListeners = new Set<PhoneListener>();
 let currentPhone: string = RESTAURANT_INFO.phone;
+let phoneLoaded = false;
 
-function notify(phone: string) {
+function notifyPhone(phone: string) {
   currentPhone = phone;
-  listeners.forEach((l) => l(phone));
+  phoneListeners.forEach((l) => l(phone));
 }
 
 async function loadPhone(): Promise<string> {
-  const raw = await storage.getItem<string>(PHONE_KEY, "");
-  if (raw && typeof raw === "string" && raw.length > 0) return raw;
+  try {
+    const remote = await fetchPhone();
+    if (remote && remote.length > 0) return remote;
+  } catch {
+    /* offline / not seeded: fall back to default */
+  }
   return RESTAURANT_INFO.phone;
 }
 
 export async function updatePhoneNumber(next: string): Promise<boolean> {
   const cleaned = next.trim();
   if (!cleaned) return false;
-  const ok = await storage.setItem(PHONE_KEY, cleaned);
-  if (ok) notify(cleaned);
-  return ok;
+  try {
+    const saved = await savePhoneApi(cleaned);
+    notifyPhone(saved);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function resetPhoneToDefault(): Promise<boolean> {
-  const ok = await storage.removeItem(PHONE_KEY);
-  notify(RESTAURANT_INFO.phone);
-  return ok;
+  // Best-effort: revert local UI to default. Server value stays until admin overwrites.
+  notifyPhone(RESTAURANT_INFO.phone);
+  return true;
 }
 
 export function formatPhone(raw: string): string {
   const digits = raw.replace(/\D/g, "");
-  if (digits.length >= 10) {
-    return `${digits.slice(0, 4)} ${digits.slice(4)}`;
-  }
-  if (digits.length >= 7) {
-    return `${digits.slice(0, 4)} ${digits.slice(4)}`;
-  }
+  if (digits.length >= 7) return `${digits.slice(0, 4)} ${digits.slice(4)}`;
   return raw;
 }
 
@@ -49,57 +60,83 @@ export function usePhoneNumber(): { phone: string; phoneDisplay: string } {
 
   useEffect(() => {
     let mounted = true;
-    loadPhone().then((p) => {
-      if (mounted) {
-        currentPhone = p;
-        setPhone(p);
-      }
-    });
-    const l: Listener = (p) => setPhone(p);
-    listeners.add(l);
+    if (!phoneLoaded) {
+      phoneLoaded = true;
+      loadPhone().then((p) => {
+        if (!mounted) return;
+        notifyPhone(p);
+      });
+    }
+    const l: PhoneListener = (p) => setPhone(p);
+    phoneListeners.add(l);
     return () => {
       mounted = false;
-      listeners.delete(l);
+      phoneListeners.delete(l);
     };
   }, []);
 
   return { phone, phoneDisplay: formatPhone(phone) };
 }
 
-// Admin session (in-memory only; cleared on app restart)
-let adminAuthenticated = false;
-const authListeners = new Set<(v: boolean) => void>();
+// ---------- Admin auth (JWT via backend) ----------
+type AuthListener = (v: boolean) => void;
+const authListeners = new Set<AuthListener>();
+let adminAuthenticated: boolean | null = null;
+
+function notifyAuth(v: boolean) {
+  adminAuthenticated = v;
+  authListeners.forEach((f) => f(v));
+}
+
+async function bootstrapAuth() {
+  const t = await getToken();
+  notifyAuth(!!t);
+}
 
 export function useAdminAuth(): {
   isAuthenticated: boolean;
-  login: (user: string, pass: string) => boolean;
-  logout: () => void;
+  loaded: boolean;
+  login: (user: string, pass: string) => Promise<string | null>;
+  logout: () => Promise<void>;
 } {
-  const [isAuth, setIsAuth] = useState<boolean>(adminAuthenticated);
+  const [state, setState] = useState<{ isAuth: boolean; loaded: boolean }>({
+    isAuth: !!adminAuthenticated,
+    loaded: adminAuthenticated !== null,
+  });
 
   useEffect(() => {
-    const l = (v: boolean) => setIsAuth(v);
+    if (adminAuthenticated === null) {
+      bootstrapAuth();
+    }
+    const l: AuthListener = (v) => setState({ isAuth: v, loaded: true });
     authListeners.add(l);
     return () => {
       authListeners.delete(l);
     };
   }, []);
 
-  const login = useCallback((user: string, pass: string) => {
-    const expectedUser = process.env.EXPO_PUBLIC_ADMIN_USER ?? "";
-    const expectedPass = process.env.EXPO_PUBLIC_ADMIN_PASS ?? "";
-    if (user.trim() === expectedUser && pass === expectedPass) {
-      adminAuthenticated = true;
-      authListeners.forEach((f) => f(true));
-      return true;
+  const login = useCallback(async (user: string, pass: string): Promise<string | null> => {
+    try {
+      await loginApi(user.trim(), pass);
+      notifyAuth(true);
+      return null;
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        return "Credenziali non valide. Riprova.";
+      }
+      return "Impossibile connettersi al server. Riprova più tardi.";
     }
-    return false;
   }, []);
 
-  const logout = useCallback(() => {
-    adminAuthenticated = false;
-    authListeners.forEach((f) => f(false));
+  const logout = useCallback(async () => {
+    await logoutApi();
+    notifyAuth(false);
   }, []);
 
-  return { isAuthenticated: isAuth, login, logout };
+  return { isAuthenticated: state.isAuth, loaded: state.loaded, login, logout };
+}
+
+export async function forceLogout(): Promise<void> {
+  await clearToken();
+  notifyAuth(false);
 }

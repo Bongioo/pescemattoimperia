@@ -45,7 +45,7 @@ export default function AdminMenuEditor() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { isAuthenticated } = useAdminAuth();
+  const { isAuthenticated, loaded } = useAdminAuth();
   const { menu } = useMenu();
 
   const [expanded, setExpanded] = useState<Record<string, boolean>>(() => {
@@ -55,6 +55,10 @@ export default function AdminMenuEditor() {
   const [editing, setEditing] = useState<Editing>(null);
   const [confirm, setConfirm] = useState<Confirm>(null);
   const [toast, setToast] = useState<string | null>(null);
+
+  if (!loaded) {
+    return <View style={{ flex: 1, backgroundColor: "#05080F" }} />;
+  }
 
   if (!isAuthenticated) {
     return <Redirect href="/admin/login" />;

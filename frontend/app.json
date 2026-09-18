@@ -7,6 +7,12 @@
     "icon": "./assets/images/icon.png",
     "scheme": "ilpescematto",
     "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.emergent.ilpescematto.jurrg4"
+    },
+    "android": {
+      "package": "com.emergent.ilpescematto.jurrg4"
+    },
     "web": {
       "bundler": "metro",
       "output": "single",

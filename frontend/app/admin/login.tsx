@@ -38,17 +38,17 @@ export default function AdminLogin() {
     }
   };
 
-  const submit = () => {
+  const submit = async () => {
     setSubmitting(true);
     setError(null);
-    const ok = login(user, pass);
+    const err = await login(user, pass);
     setSubmitting(false);
-    if (ok) {
+    if (!err) {
       haptic("light");
       router.replace("/admin/settings");
     } else {
       haptic("error");
-      setError("Credenziali non valide. Riprova.");
+      setError(err);
     }
   };
 

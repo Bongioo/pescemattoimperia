@@ -1,0 +1,34 @@
+{
+  "summary": "Full backend + frontend regression for Il Pescematto after migrating admin auth to FastAPI JWT + bcrypt and moving phone/menu to MongoDB. Backend: 12/12 pytest tests pass (login 200 + wrong-cred 401, GET /api/settings/phone|menu public, PUT/DELETE phone|menu enforced by Bearer JWT, Create->GET persistence verified). Frontend: cookie notice ack persists (cookie_notice.acknowledged in localStorage), Home loads phone from /api/settings/phone (not from bundle), admin login stores JWT under key 'auth.token' in localStorage (AsyncStorage web backend), redirect to /admin/settings after login, JWT persisted across full page reload, admin phone edit PUTs to backend and /api/settings/phone reflects the new value, admin menu editor opens, reset menu triggers DELETE /api/settings/menu (menu becomes null), logout clears 'auth.token' and re-accessing /admin/settings redirects to /admin/login. No red-screen. Only prior benign RN-Web warning ('props.pointerEvents deprecated') persists (non-blocking).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": [
+      {"component": "props.pointerEvents", "issue": "Pre-existing RN Web deprecation warning: 'props.pointerEvents is deprecated. Use style.pointerEvents'. Non-blocking; migrate remaining usages to style.pointerEvents."}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_pescematto_api.py",
+    "/app/test_reports/pytest/results.xml"
+  ],
+  "action_items": [
+    "Optional: replace remaining `pointerEvents` props with `style.pointerEvents` to silence the RN Web deprecation warning."
+  ],
+  "critical_code_review_comments": [
+    "Backend correctly uses os.environ['...'] with fail-fast on missing env vars (MONGO_URL, DB_NAME, JWT_SECRET, ADMIN_USERNAME, ADMIN_PASSWORD_HASH).",
+    "JWT expiry set to 12h and returned as expires_in seconds (43200), matching the spec.",
+    "PUT /settings/phone and PUT/DELETE /settings/menu correctly require Bearer JWT via HTTPBearer(auto_error=True). Missing/invalid token yields 401/403 as expected.",
+    "settings_col uses string _id ('phone', 'menu') and responses project it out — no ObjectId leakage.",
+    "Frontend api.ts uses process.env.EXPO_PUBLIC_BACKEND_URL only; token key 'auth.token' matches request spec. AsyncStorage web shim writes to localStorage — confirmed at runtime.",
+    "useMenu/useSettings correctly fall back to bundled defaults on network error and auto-logout on 401 from mutations (forceLogout)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100% (12/12)", "frontend": "100%"},
+  "seed_data_creation": "Tests write a marker phone value and a marker TEST_ menu payload via authenticated PUT; DELETE test resets the menu doc. No permanent seed left behind (menu doc is deleted at end).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend pytest suite at /app/backend/tests/test_pescematto_api.py (12 tests, ~2s). Public URL: https://il-pescematto.preview.emergentagent.com. Credentials from /app/memory/test_credentials.md (PESCEMATTO / MRPescematto.2026). JWT persists in localStorage['auth.token'] on web via AsyncStorage; cookie ack in localStorage['cookie_notice.acknowledged'].",
+  "rca_of_issue": "N/A — no bugs found. Migration to backend-side settings is fully working end-to-end."
+}

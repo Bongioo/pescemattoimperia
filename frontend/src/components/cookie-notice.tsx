@@ -32,8 +32,7 @@ export function CookieNotice() {
 
   return (
     <View
-      style={[styles.wrap, { bottom: tabBarHeight + spacing.sm }]}
-      pointerEvents="box-none"
+      style={[styles.wrap, { bottom: tabBarHeight + spacing.sm, pointerEvents: "box-none" }]}
       testID="cookie-notice"
     >
       <View style={styles.card}>

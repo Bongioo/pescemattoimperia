@@ -22,7 +22,7 @@ export default function AdminSettings() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { isAuthenticated, logout } = useAdminAuth();
+  const { isAuthenticated, loaded, logout } = useAdminAuth();
   const { phone } = usePhoneNumber();
   const { menu } = useMenu();
 
@@ -33,6 +33,10 @@ export default function AdminSettings() {
   useEffect(() => {
     setValue(phone);
   }, [phone]);
+
+  if (!loaded) {
+    return <View style={{ flex: 1, backgroundColor: "#05080F" }} />;
+  }
 
   if (!isAuthenticated) {
     return <Redirect href="/admin/login" />;
@@ -74,8 +78,8 @@ export default function AdminSettings() {
     }
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     router.replace("/(tabs)/info");
   };
 

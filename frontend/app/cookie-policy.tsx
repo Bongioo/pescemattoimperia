@@ -57,25 +57,22 @@ export default function CookiePolicy() {
 
       <LegalSection title="2. Strumenti tecnici locali (localStorage)">
         <LegalParagraph>
-          Il Sito utilizza il localStorage del browser per memorizzare alcune
-          preferenze operative del gestore. Tali dati restano esclusivamente sul
-          dispositivo dell'utente, non sono trasmessi a server esterni né condivisi
-          con terze parti.
+          Il Sito utilizza il localStorage del browser (o SecureStore su
+          applicazione nativa) esclusivamente per due finalità tecniche
+          strettamente necessarie: mantenere la sessione dell'area riservata
+          gestore e ricordare che l'informativa iniziale è stata visualizzata.
+          Le informazioni pubbliche (numero di telefono, menu) sono invece
+          conservate sul nostro server per garantire coerenza tra tutti i
+          visitatori.
         </LegalParagraph>
         <LegalTable
           columns={["Chiave", "Tipo", "Finalità", "Durata"]}
           rows={[
             [
-              "settings.phone",
+              "auth.token",
               "localStorage",
-              "Ricorda il numero di telefono personalizzato dal gestore.",
-              "Persistente finché non viene cancellato dal browser.",
-            ],
-            [
-              "settings.menu",
-              "localStorage",
-              "Ricorda le modifiche al menu effettuate dal gestore.",
-              "Persistente finché non viene cancellato dal browser.",
+              "Mantiene la sessione dell'area riservata dopo il login del gestore. Assente per gli utenti non autenticati.",
+              "12 ore o fino al logout / cancellazione manuale.",
             ],
             [
               "cookie_notice.acknowledged",
@@ -92,16 +89,28 @@ export default function CookiePolicy() {
         </LegalCallout>
       </LegalSection>
 
-      <LegalSection title="3. Area riservata gestore">
+      <LegalSection title="3. Dati conservati sul server">
         <LegalParagraph>
-          L'accesso all'area riservata avviene tramite credenziali. La sessione di
-          autenticazione è mantenuta esclusivamente in memoria durante la visita:
-          non vengono utilizzati cookie né token persistenti. La chiusura della
-          scheda del browser termina la sessione.
+          Le informazioni pubbliche mostrate ai visitatori (numero di telefono e
+          menu) sono conservate su un nostro database, gestito dal fornitore
+          tecnico di hosting. Non contengono dati personali di visitatori. Le
+          modifiche possono essere effettuate esclusivamente dal gestore
+          autenticato.
         </LegalParagraph>
       </LegalSection>
 
-      <LegalSection title="4. Servizi aperti su azione esplicita dell'utente">
+      <LegalSection title="4. Area riservata gestore">
+        <LegalParagraph>
+          L'accesso all'area riservata avviene tramite credenziali verificate
+          lato server. In caso di autenticazione riuscita il server rilascia un
+          token temporaneo (JWT) valido 12 ore, che il browser conserva
+          localmente e che accompagna le richieste di modifica. La password non
+          è mai memorizzata nell'app: sul server è conservato solo un hash
+          crittografico (bcrypt).
+        </LegalParagraph>
+      </LegalSection>
+
+      <LegalSection title="5. Servizi aperti su azione esplicita dell'utente">
         <LegalParagraph>
           Alcune azioni dell'utente possono richiamare applicazioni o servizi di
           terze parti, il cui utilizzo è governato dalle rispettive privacy policy:
@@ -117,7 +126,7 @@ export default function CookiePolicy() {
         </LegalParagraph>
       </LegalSection>
 
-      <LegalSection title="5. Strumenti che NON utilizziamo">
+      <LegalSection title="6. Strumenti che NON utilizziamo">
         <LegalParagraph>
           A fini di trasparenza, si precisa che il Sito non utilizza:
         </LegalParagraph>
@@ -133,12 +142,12 @@ export default function CookiePolicy() {
         />
       </LegalSection>
 
-      <LegalSection title="6. Gestione delle preferenze e cancellazione">
+      <LegalSection title="7. Gestione delle preferenze e cancellazione">
         <LegalParagraph>
-          È possibile cancellare in qualsiasi momento le informazioni salvate
-          localmente dal Sito. La cancellazione ripristina il numero di telefono e
-          il menu ai valori originali; l'utente resta connesso ma dovrà nuovamente
-          accedere all'area riservata.
+          È possibile cancellare in qualsiasi momento le informazioni tecniche
+          salvate localmente da questo dispositivo (token di sessione gestore e
+          preferenza di visualizzazione dell'informativa). I dati pubblici del
+          Sito (numero di telefono e menu) restano invece invariati sul server.
         </LegalParagraph>
         <Pressable
           onPress={doClear}
@@ -161,7 +170,7 @@ export default function CookiePolicy() {
         </LegalParagraph>
       </LegalSection>
 
-      <LegalSection title="7. Titolare del trattamento">
+      <LegalSection title="8. Titolare del trattamento">
         <LegalParagraph>
           Il Titolare è TRATTORIA DELLA SALUTE S.R.L.S., con sede legale in Piazza
           Matteotti n. 6 — 18015 Riva Ligure (IM), P.IVA / C.F. 01716090087. Per
@@ -175,7 +184,7 @@ export default function CookiePolicy() {
         </Pressable>
       </LegalSection>
 
-      <LegalSection title="8. Aggiornamenti">
+      <LegalSection title="9. Aggiornamenti">
         <LegalParagraph>
           Ci riserviamo di aggiornare la presente Cookie Policy qualora vengano
           introdotti nuovi strumenti. In tal caso verrà mostrata una nuova
