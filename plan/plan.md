@@ -1,142 +1,86 @@
-# Piano — Pubblicazione come sito web + gestione cookie/tracciamento
+# Piano — Pubblicare Il Pescematto come sito web
 
-## 1. Da progetto Expo a sito web pubblico
+## Punto di partenza
 
-Il progetto è già impostato su Expo con `react-native-web`. Può essere pubblicato come sito web senza riscriverlo: le stesse schermate (Home, Menu, Info, Area gestore) diventano pagine SPA servite dal browser.
+Il progetto è già oggi un sito web funzionante:
+- L'interfaccia (Home, Menu, Info, area gestore, Cookie Policy, Privacy Policy) gira nel browser come single-page application.
+- Il backend risponde sotto lo stesso dominio, sulle rotte `/api/*`, quindi non serve gestire un secondo indirizzo.
+- Menu e numero di telefono sono salvati su server e visibili a tutti i visitatori.
 
-Verranno rimosse dal manifest solo le configurazioni utili unicamente allo Store:
-- identificativo pacchetto iOS
-- identificativo pacchetto Android
-- icona adattiva Android
-- flag "supportsTablet" iOS
+"Pubblicare come sito web" significa, in pratica, premere il pulsante **Publish** in alto a destra dell'editor Emergent e scegliere il flusso di deploy web. Non serve un altro provider, un altro dominio a pagamento, né riscrivere codice.
 
-Non verrà tolto niente che serva al funzionamento web. Il pulsante di pubblicazione di Emergent viene usato in modalità "solo web".
-
-Nessun cambio a design, contenuti o funzionalità.
+Il piano copre tutto ciò che è meglio sistemare *prima* di premere Publish, così il risultato pubblicato è pulito. Non introduce nuove funzionalità.
 
 ---
 
-## 2. Audit reale del progetto (ciò che il sito usa oggi)
+## 1. Nome e identità del sito nel browser
 
-Analisi del codice così com'è, senza inventare nulla:
+Oggi la scheda del browser mostra "il-pescematto" (nome tecnico del progetto) e l'icona è il logo generico Expo. In un sito pubblico bisogna renderli professionali.
 
-### Cookie propri del sito
-Nessuno. Il sito non imposta cookie sul proprio dominio.
+Verrà cambiato:
+- **Titolo pagina** → "Il Pescematto — Trattoria del Mare · Imperia"
+- **Favicon** → il logo del ristorante (quello già usato in Home), preparato nelle dimensioni corrette per browser desktop e mobile
+- **Nome dell'app nel manifest web** → "Il Pescematto"
 
-### Local storage (prima parte, tecnico)
-- `settings.phone` — numero di telefono personalizzato dal gestore
-- `settings.menu` — versione personalizzata del menu dal gestore
-
-Entrambi servono al funzionamento della funzione di modifica del gestore. Non escono dal browser, non vengono inviati a nessuno.
-
-### Area gestore
-Autenticazione tenuta solo in memoria (persa alla chiusura della scheda). Nessun cookie, nessun token persistente.
-
-### Risorse caricate da domini esterni
-- 1 logo servito da `customer-assets-cm19k8pv.emergentagent.net` (dominio della piattaforma di hosting)
-- 2 immagini di sfondo servite da `images.unsplash.com` (hero della Home e banner della Info)
-
-Queste sono richieste di sole immagini, non impostano cookie di tracciamento sul dominio del sito, ma sono comunque richieste verso un dominio terzo.
-
-### Servizi terzi che si attivano solo su azione esplicita dell'utente
-- "Apri in Maps" apre Google Maps in una nuova scheda (link esterno standard)
-- "Chiama" / "Prenota" apre il compositore telefonico (`tel:`)
-
-Nessun contenuto di terze parti è incorporato in pagina.
-
-### Cosa NON è presente nel progetto
-Nessun Google Analytics, nessun Google Tag Manager, nessun Meta/Facebook Pixel, nessun TikTok Pixel, nessun embed YouTube o Instagram, nessun font caricato da CDN, nessun sistema di prenotazione, nessun chatbot, nessun widget marketing, nessuna libreria di fingerprinting.
-
-### Conclusione dell'audit
-Il sito nella sua forma attuale usa **soltanto strumenti tecnici**. Non c'è nulla per cui, oggi, sia richiesto un consenso preventivo dell'utente.
+Nessuna modifica al design interno.
 
 ---
 
-## 3. Scelta sulle immagini remote
+## 2. Descrizione per motori di ricerca e condivisioni social
 
-Le due hero images (Unsplash) e il logo (CDN Emergent) sono immagini decorative caricate da domini terzi. Non fanno tracking, ma sono comunque richieste esterne che l'utente attento può notare negli strumenti di sviluppo del browser.
+Quando qualcuno cerca il ristorante su Google, o incolla il link su WhatsApp / Facebook / Messenger, oggi appare un'anteprima vuota. Verrà aggiunta:
 
-Due possibili strade:
-
-**A. Portarle nel bundle del sito** (raccomandata): il sito non fa più alcuna richiesta di dominio terzo. La Cookie Policy diventa più semplice e onesta perché non deve neanche menzionarle. Costo: qualche centinaio di KB in più nel pacchetto scaricato al primo accesso.
-
-**B. Lasciarle remote**: nessun cambiamento tecnico, ma la Cookie Policy dovrà elencare `images.unsplash.com` (e il dominio Emergent) come fornitori di risorse grafiche di terza parte.
-
-Assunzione senza risposta contraria: **Opzione A**.
+- **Meta description**: una frase breve tipo "Trattoria di mare a Borgo Prino, Imperia. Menu di pesce fresco, griglia Josper e pizze. Aperto tutti i giorni tranne il mercoledì."
+- **Open Graph / Twitter Card**: titolo, descrizione, immagine di anteprima (il logo su sfondo scuro dell'app). È l'immagine che appare quando si incolla il link in una chat.
+- **Lingua della pagina** dichiarata come italiano.
+- **Nessun sistema di analytics o pixel** viene aggiunto. Se in futuro il titolare vorrà misurare le visite, si aggiornerà l'informativa e verrà attivato un vero banner di consenso.
 
 ---
 
-## 4. Cosa verrà mostrato all'utente
+## 3. Cosa succede nel momento del Publish
 
-Poiché non ci sono strumenti che richiedano consenso, non verrà costruito un finto pannello "Accetta / Rifiuta / Personalizza" — sarebbe fittizio e in contrasto con le richieste stesse dell'utente. Verrà invece implementato:
+Lato utente:
+- Il sito diventa raggiungibile all'indirizzo assegnato da Emergent (in genere `nome-progetto.emergent.host` o simile).
+- L'indirizzo è servito in HTTPS.
+- Il database del sito di preview e il database di produzione si separano da quel momento in poi: le modifiche al menu fatte oggi in anteprima non arrivano automaticamente in produzione. Dopo il primo deploy, il gestore rifà login sul sito pubblicato e aggiorna telefono / menu una volta; da lì restano.
+- Le credenziali dell'area riservata gestore (username `PESCEMATTO`, password `MRPescematto.2026`) vengono copiate come Secrets nel pannello di deploy al primo Publish. Se il titolare vuole cambiare la password dopo il deploy, si genera un nuovo hash bcrypt e si aggiorna il Secret — non serve rideployare tutto.
 
-### a. Un'informativa breve alla prima visita
-Piccolo pannello in basso, coerente con lo stile del sito (stessi colori scuri marittimi, stesso font display, stessi bordi), non oscura la pagina.
-
-Testo indicativo:
-> "Questo sito usa soltanto strumenti tecnici salvati sul tuo browser (per esempio per ricordare le modifiche fatte dal gestore al menu). Non usiamo analytics, cookie di profilazione o pixel di marketing. Puoi leggere la Cookie Policy per il dettaglio."
-
-Un solo pulsante di chiusura ("Ho capito") e un link "Leggi la Cookie Policy". Nessuna casella preselezionata, nessun consenso mascherato: la chiusura è solo un acknowledgment dell'informativa, non un consenso a tracciamenti (che non esistono).
-
-Lo scroll e la semplice navigazione non chiudono il banner. La chiusura richiede un click esplicito.
-
-### b. Link "Gestisci cookie" sempre disponibile
-Aggiunto nel footer già presente (pagina Info). Riapre l'informativa e permette anche di cancellare le preferenze tecniche locali (pulsante "Cancella preferenze salvate su questo dispositivo", che svuota `settings.phone` e `settings.menu`).
-
-### c. Se in futuro il titolare vorrà attivare analytics o strumenti di marketing
-La stessa infrastruttura verrà estesa al modello a tre pulsanti (Accetta / Rifiuta / Personalizza) con blocco preventivo degli script. Non lo facciamo ora perché oggi non c'è nulla da bloccare.
+Lato tecnico (già coperto dall'audit di deploy fatto):
+- Il codice compila.
+- Le variabili sensibili sono lato server, non nel bundle.
+- Le rotte API sono sotto `/api` come richiesto.
 
 ---
 
-## 5. Pagina Cookie Policy — `/cookie-policy`
+## 4. Prima di premere Publish — cose che il titolare deve decidere
 
-Contenuto costruito solo su ciò che l'audit ha trovato. Sezioni previste:
+Non li può decidere il piano. Vanno confermati o assunti come default:
 
-- **Strumenti tecnici locali**: tabella con `settings.phone` e `settings.menu`. Per ciascuno: fornitore (prima parte, il sito stesso), tipologia (localStorage), finalità, durata (persistente finché l'utente non li cancella dal browser), come cancellarli.
-- **Terze parti — risorse grafiche**: sezione presente solo se resta l'Opzione B del punto 3.
-- **Servizi aperti dall'utente su click esplicito**: Google Maps (link esterno) e compositore telefonico. Nota che, una volta aperto Google Maps, si applica la privacy policy di Google.
-- **Area riservata gestore**: sessione tenuta in memoria durante la visita, nessun cookie né storage persistente.
-- **Cosa NON usiamo**: elenco esplicito di Google Analytics, Google Tag Manager, Meta Pixel, TikTok Pixel, YouTube embed, Instagram, Facebook SDK, chat, font esterni. Serve alla trasparenza.
-- Data di ultimo aggiornamento e collegamento alla Privacy Policy.
-
-Nessun campo verrà inventato. Se un dato non è deducibile dal progetto, viene segnalato come "da completare a cura del titolare", non riempito con contenuto fittizio.
-
----
-
-## 6. Pagina Privacy Policy — `/privacy-policy`
-
-Sarà creata una struttura predisposta. I dati del titolare già in nostro possesso vengono usati così come sono:
-- TRATTORIA DELLA SALUTE S.R.L.S.
-- Piazza Matteotti n. 6, 18015 Riva Ligure (IM)
-- P.IVA / C.F. 01716090087 — REA 220844
-- Telefono 0183 754557
-
-Verranno inseriti placeholder chiaramente marcati (`[DA COMPLETARE — …]`) per le informazioni che il sito da solo non può ricavare, in particolare:
-- indirizzo email dedicato alle richieste privacy
-- eventuale DPO
-- eventuali trattamenti offline (fatturazione, prenotazioni telefoniche) che il titolare vorrà descrivere
-
-Non verranno inventati DPO, email o finalità di trattamento inesistenti.
+1. **Nome pubblico del dominio**: si tiene quello suggerito da Emergent oppure il titolare comunicherà un dominio proprio (per esempio `ilpescematto.it`) da collegare dopo il deploy?
+   - **Assunzione se non risponde**: si tiene il dominio Emergent per il primo deploy. Il collegamento di un dominio proprio è un passaggio separato che avviene dopo, dal pannello Emergent.
+2. **Email privacy nella Privacy Policy**: oggi è segnata come `[DA COMPLETARE]`. Prima del Publish sarebbe corretto sostituirla con l'indirizzo email a cui i clienti possono scrivere per richieste privacy.
+   - **Assunzione se non risponde**: si lascia il placeholder. Il sito pubblicato mostrerà "[DA COMPLETARE]" nella policy, cosa visibile ai visitatori. Si consiglia di non lasciarlo così.
+3. **Immagine per anteprima social**: si tiene il logo attuale come immagine di condivisione, oppure il titolare fornirà una foto specifica del locale?
+   - **Assunzione se non risponde**: si usa il logo su sfondo scuro (già nell'app).
+4. **Password gestore in produzione**: si tiene `MRPescematto.2026` anche sul sito pubblicato, o si sceglie una password diversa da usare solo online?
+   - **Assunzione se non risponde**: si tiene la stessa.
 
 ---
 
-## 7. Cosa non verrà cambiato
+## 5. Cosa il piano **non** fa
 
-Nessun cambiamento a: palette, font, layout, contenuti del menu, orari, info di contatto, flusso di login gestore, modifica telefono, modifica menu. Il pulsante "Publish" di Emergent continua a funzionare come oggi.
-
----
-
-## 8. Punti che richiedono una scelta del titolare
-
-Elencati esplicitamente perché il piano non può decidere per lui:
-
-1. Email di contatto per richieste privacy (necessaria in Privacy Policy).
-2. Eventuale nomina di un DPO (di solito non richiesta per questo tipo di attività, ma è una scelta del titolare).
-3. Opzione A vs B sulle immagini remote (punto 3).
-4. Se in futuro verrà aggiunto un form di prenotazione online, un widget di recensioni, un pixel pubblicitario o Google Analytics: cambierà l'audit e verrà attivato un vero banner con blocco preventivo.
+- Non compra domini.
+- Non attiva analytics, pixel pubblicitari, form di contatto o sistemi di prenotazione online. Se aggiunti in futuro, cambia l'informativa cookie e va rivalutato.
+- Non modifica il flusso di modifica menu / telefono già esistente.
+- Non tocca colori, layout, contenuti del menu, orari.
+- Non deploya al posto del titolare: il pulsante Publish va premuto da chi ha accesso all'editor.
 
 ---
 
-## 9. Rischio residuo dichiarato
+## 6. Sintesi dell'esito atteso
 
-L'implementazione tecnica sarà coerente con quello che il sito fa oggi. Non verrà dichiarato che il sito è "conforme al 100%" a nessuna normativa: la conformità legale piena richiede una verifica di un professionista del diritto, che non viene fatta qui. L'obiettivo di questo lavoro è tecnicamente corretto, coerente con la normativa italiana/europea sui cookie applicata a un sito che usa solo strumenti tecnici, e predisposto a evolvere se in futuro verranno aggiunti strumenti che richiedono consenso.
+Dopo l'approvazione di questo piano e l'esecuzione:
+- L'anteprima in preview è identica a quella pubblicata, salvo il dominio.
+- Chi apre il link vede "Il Pescematto — Trattoria del Mare · Imperia" nella scheda del browser, il logo come favicon, e un'anteprima decorosa se il link viene condiviso su chat / social.
+- Il titolare può aggiornare menu e telefono dal proprio dispositivo e le modifiche sono visibili a tutti.
+- Nessuna nuova dipendenza esterna, nessun costo aggiuntivo rispetto all'hosting Emergent, nessun tracciamento di visitatori.
